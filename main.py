@@ -11,9 +11,9 @@ from PyRoxy import ProxyType, Proxy
 
 TIMEOUT = 10
 PROXY_TIMEOUT = 10
-SCRAPE_THREADS = 100
+SCRAPE_THREADS = 20
 PROXY_THREADS = 500
-IP_REGEX = r'[0-9]+(?:\.[0-9]+){3}'
+IP_REGEX = r'[0-9]{1,3}(?:\.[0-9]+){3}'
 PORT_REGEX = r'[0-9]+'
 IP_PORT_REGEX = rf'({IP_REGEX}):({PORT_REGEX})'
 IP_PORT_TABLE_REGEX = rf'({IP_REGEX})\s*</td>\s*<td>\s*({PORT_REGEX})'
@@ -157,6 +157,7 @@ PROVIDERS = [
     GeonodeProvider('https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&speed=medium&protocols=socks4', ProxyType.SOCKS4),
     HideMyNameProvider('https://hidemy.name/ru/proxy-list/?type=4', ProxyType.SOCKS4),
     RegexProvider('http://www.proxylists.net/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
+    RegexProvider('http://proxysearcher.sourceforge.net/Proxy%20List.php?type=socks', ProxyType.SOCKS4, IP_PORT_REGEX),
 
     # SOCKS5
     RegexProvider('https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks5', ProxyType.SOCKS5, IP_PORT_REGEX),
@@ -200,10 +201,11 @@ PROVIDERS = [
     RegexProvider('https://www.proxy-list.download/api/v1/get?type=https', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://spys.me/proxy.txt', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('https://www.sslproxies.org/', ProxyType.HTTP, IP_PORT_REGEX),
-    RegexProvider('https://www.my-proxy.com/free-proxy-list.html', ProxyType.HTTP, IP_PORT_REGEX),
+    RegexProvider('https://www.my-proxy.com/free-anonymous-proxy.html', ProxyType.HTTP, IP_PORT_REGEX),
+    RegexProvider('https://www.my-proxy.com/free-transparent-proxy.html', ProxyType.HTTP, IP_PORT_REGEX),
     *(
         RegexProvider(f'https://www.my-proxy.com/free-proxy-list-{i}.html', ProxyType.HTTP, IP_PORT_REGEX)
-        for i in range(2, 11)
+        for i in range(1, 11)
     ),
     RegexProvider('https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/https.txt', ProxyType.HTTP, IP_PORT_REGEX),
@@ -226,6 +228,7 @@ PROVIDERS = [
     RegexProvider('https://www.freeproxychecker.com/result/http_proxies.txt', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://www.httptunnel.ge/ProxyListForFree.aspx', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://api.foxtools.ru/v2/Proxy.txt', ProxyType.HTTP, IP_PORT_REGEX),
+    RegexProvider('http://proxysearcher.sourceforge.net/Proxy%20List.php?type=http', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('https://www.ipaddress.com/proxy-list/', ProxyType.HTTP, rf'({IP_REGEX})</a>:({PORT_REGEX})'),
     ProxyListProvider('https://proxy-list.org/english/index.php', ProxyType.HTTP),
     *(
