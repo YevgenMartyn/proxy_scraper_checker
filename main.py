@@ -131,8 +131,36 @@ class ProxyListProvider(RegexProvider):
             yield ip, port, self.proto
 
 
+class FarmProxyProvider(RegexProvider):
+    def __init__(self, api_key, proxy):
+        self.proxy = proxy
+        super().__init__(
+            url=f'https://panel.farmproxy.net/api/v1/proxies.protocol-ip-port.txt?api_key={api_key}',
+            proto=None,
+            regex=rf'(socks4|socks5|http)://({IP_REGEX}):({PORT_REGEX})'
+        )
+
+    def parse(self, data):
+        for proto, ip, port in re.findall(self.regex, data):
+            yield ip, port, ProxyType[proto.upper()]
+
+    def fetch(self, url):
+        response = requests.get(url=url, timeout=TIMEOUT, headers=get_headers(), proxies={'https': self.proxy})
+        response.raise_for_status()
+        return response.text
+
+
 # noinspection LongLine
 PROVIDERS = [
+    # Paid
+    # FarmProxyProvider(
+    #     os.getenv('FARM_PROXY_API_KEY'),
+    #     os.getenv('STABLE_IP_PROXY')
+    # ),
+    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/farmproxy/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
+    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/farmproxy/socks5.txt', ProxyType.SOCKS5, IP_PORT_REGEX),
+    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/farmproxy/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
+
     # SOCKS4
     RegexProvider('https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://api.proxyscrape.com/?request=displayproxies&proxytype=socks4', ProxyType.SOCKS4, IP_PORT_REGEX),
