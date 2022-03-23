@@ -13,7 +13,10 @@ jobs:
       - name: Install packages
         run: python3 -m pip install -r requirements.txt
       - name: Update proxies
-        run: FARM_PROXY_API_KEY=${{ secrets.FARM_PROXY_API_KEY }} STABLE_IP_PROXY=${{ secrets.STABLE_IP_PROXY }} python3 main.py
+        run: python3 main.py
+        env:
+          - FARM_PROXY_API_KEY=${{ secrets.FARM_PROXY_API_KEY }}
+          - STABLE_IP_PROXY=${{ secrets.STABLE_IP_PROXY }}
       - uses: test-room-7/action-update-file@v1
         with:
           file-path: proxies.txt

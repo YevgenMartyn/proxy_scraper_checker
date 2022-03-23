@@ -7,6 +7,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 from PyRoxy import ProxyType, Proxy
+import logging
+
+
+logging.basicConfig(format='[%(asctime)s - %(levelname)s] %(message)s', datefmt="%H:%M:%S")
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 TIMEOUT = 10
@@ -152,32 +158,28 @@ class FarmProxyProvider(RegexProvider):
 
 # noinspection LongLine
 PROVIDERS = [
-    # Paid
+    # Custom
+    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/manual/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
+    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/manual/socks5.txt', ProxyType.SOCKS5, IP_PORT_REGEX),
+    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/manual/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
     # FarmProxyProvider(
     #     os.getenv('FARM_PROXY_API_KEY'),
     #     os.getenv('STABLE_IP_PROXY')
     # ),
-    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/farmproxy/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
-    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/farmproxy/socks5.txt', ProxyType.SOCKS5, IP_PORT_REGEX),
-    RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/farmproxy/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
 
     # SOCKS4
     RegexProvider('https://api.proxyscrape.com/v2/?request=displayproxies&protocol=socks4', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://api.proxyscrape.com/?request=displayproxies&proxytype=socks4', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
-    # RegexProvider('https://raw.githubusercontent.com/mmpx12/proxy-list/master/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS4_RAW.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/UserR3X/proxy-list/main/online/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
-    # RegexProvider('https://www.proxy-list.download/api/v1/get?type=socks4', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://www.my-proxy.com/free-socks-4-proxy.html', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://www.socks-proxy.net/', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://www.freeproxychecker.com/result/socks4_proxies.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('http://proxydb.net/?protocol=socks4', ProxyType.SOCKS4, IP_PORT_REGEX),
-    # RegexProvider('https://api.openproxylist.xyz/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://socks-proxy.net/', ProxyType.SOCKS4, IP_PORT_REGEX),
-    # RegexProvider('https://openproxy.space/list/socks4', ProxyType.SOCKS4, f'"{IP_PORT_REGEX}"'),
     PubProxyProvider('http://pubproxy.com/api/proxy?limit=5&format=txt&type=socks4', ProxyType.SOCKS4),
     RegexProvider('https://www.proxy-list.download/SOCKS4', ProxyType.SOCKS4, IP_PORT_TABLE_REGEX),
     GeonodeProvider('https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&speed=fast&protocols=socks4', ProxyType.SOCKS4),
@@ -244,20 +246,17 @@ PROVIDERS = [
     RegexProvider('https://free-proxy-list.net/anonymous-proxy.html', ProxyType.HTTP, IP_PORT_REGEX),
     PubProxyProvider('http://pubproxy.com/api/proxy?limit=5&format=txt&type=http', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://www.proxylists.net/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
-    RegexProvider('https://raw.githubusercontent.com/human1ty/proxy/main/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
-    RegexProvider('https://pastebin.com/raw/vQzZ8CwG', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('https://openproxy.space/list/http', ProxyType.HTTP, f'"{IP_PORT_REGEX}"'),
     RegexProvider('https://www.proxy-list.download/HTTPS', ProxyType.HTTP, IP_PORT_TABLE_REGEX),
     RegexProvider('https://www.proxy-list.download/HTTP', ProxyType.HTTP, IP_PORT_TABLE_REGEX),
     GeonodeProvider('https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&speed=fast&protocols=http%2Chttps', ProxyType.HTTP),
     GeonodeProvider('https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&speed=medium&protocols=http%2Chttps', ProxyType.HTTP),
-    # RegexProvider('https://www.freeproxychecker.com/result/http_proxies.txt', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://www.httptunnel.ge/ProxyListForFree.aspx', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://api.foxtools.ru/v2/Proxy.txt', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('http://proxysearcher.sourceforge.net/Proxy%20List.php?type=http', ProxyType.HTTP, IP_PORT_REGEX),
     RegexProvider('https://www.ipaddress.com/proxy-list/', ProxyType.HTTP, rf'({IP_REGEX})</a>:({PORT_REGEX})'),
     ProxyListProvider('https://proxy-list.org/english/index.php', ProxyType.HTTP),
-    HideMyNameProvider('https://hidemy.name/ru/proxy-list/?type=hs', ProxyType.HTTP, pages=(1, 11))
+    HideMyNameProvider('https://hidemy.name/ru/proxy-list/?type=hs', ProxyType.HTTP, pages=(1, 11)),
 ]
 
 
@@ -270,11 +269,11 @@ def scrape_all():
         for future in as_completed(futures):
             provider = futures[future]
             try:
-                yield from future.result()
+                result = list(future.result())
+                logger.info(f'Success: {provider}: {len(result)}')
+                yield from result
             except Exception as exc:
-                print('Error', provider, exc)
-            else:
-                print('Success', provider)
+                logger.error(f'{provider}: {exc}')
 
 
 def check_proxies(proxies):
@@ -291,7 +290,7 @@ def check_proxies(proxies):
     future_to_proxy = {}
     with ThreadPoolExecutor(PROXY_THREADS) as executor:
         for url, proxies_chunk in zip(urls, (proxies[i::len(urls)] for i in range(len(urls)))):
-            print(f'Checking {len(proxies_chunk)} proxies against {url}')
+            logger.info(f'Checking {len(proxies_chunk)} proxies against {url}')
             future_to_proxy.update({
                 executor.submit(proxy.check, url, PROXY_TIMEOUT): proxy
                 for proxy in proxies_chunk
@@ -305,8 +304,9 @@ def check_proxies(proxies):
 def update_file():
     expected_at_least = 10000
     proxies = set(scrape_all())
+    logger.info(f'Proxies: {len(proxies)}')
     if len(proxies) < expected_at_least:
-        print(f'Found too few proxies: {len(proxies)}')
+        logger.error('Found too few proxies')
         exit(1)
 
     proxies = [
