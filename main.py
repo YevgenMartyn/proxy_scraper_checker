@@ -16,9 +16,9 @@ logger.setLevel(logging.INFO)
 
 
 TIMEOUT = 10
-PROXY_TIMEOUT = 10
+PROXY_TIMEOUT = 5
 SCRAPE_THREADS = 20
-PROXY_THREADS = 500
+PROXY_THREADS = 100
 IP_REGEX = r'[0-9]{1,3}(?:\.[0-9]+){3}'
 PORT_REGEX = r'[0-9]+'
 IP_PORT_REGEX = rf'({IP_REGEX}):({PORT_REGEX})'
@@ -100,6 +100,19 @@ class GeonodeProvider(Provider):
             yield row['ip'], row['port'], self.proto
 
 
+class UaShieldProvider(Provider):
+    def __init__(self, url):
+        super().__init__(url, proto=ProxyType.HTTP)
+
+    def parse(self, data):
+        data = json.loads(data)
+        for obj in data:
+            if 'auth' in obj:
+                continue
+            ip, port = obj['ip'].split(':')
+            yield ip, port, ProxyType[obj['scheme'].upper()]
+
+
 class HideMyNameProvider(RegexProvider):
     def __init__(self, url, proto, regex=IP_PORT_TABLE_REGEX, pages=(1, 10)):
         self.pages = pages
@@ -142,7 +155,7 @@ class FarmProxyProvider(RegexProvider):
         self.proxy = proxy
         super().__init__(
             url=f'https://panel.farmproxy.net/api/v1/proxies.protocol-ip-port.txt?api_key={api_key}',
-            proto=None,
+            proto=ProxyType.HTTP,
             regex=rf'(socks4|socks5|http)://({IP_REGEX}):({PORT_REGEX})'
         )
 
@@ -158,10 +171,13 @@ class FarmProxyProvider(RegexProvider):
 
 # noinspection LongLine
 PROVIDERS = [
-    # Custom
+    # Manual
     RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/manual/socks4.txt', ProxyType.SOCKS4, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/manual/socks5.txt', ProxyType.SOCKS5, IP_PORT_REGEX),
     RegexProvider('https://raw.githubusercontent.com/porthole-ascend-cinnamon/proxy_scraper/main/manual/http.txt', ProxyType.HTTP, IP_PORT_REGEX),
+
+    # Multi-scheme
+    UaShieldProvider('https://raw.githubusercontent.com/opengs/uashieldtargets/v2/proxy.json'),
     # FarmProxyProvider(
     #     os.getenv('FARM_PROXY_API_KEY'),
     #     os.getenv('STABLE_IP_PROXY')
@@ -269,7 +285,7 @@ def scrape_all():
         for future in as_completed(futures):
             provider = futures[future]
             try:
-                result = list(future.result())
+                result = set(future.result())
                 logger.info(f'Success: {provider}: {len(result)}')
                 yield from result
             except Exception as exc:
