@@ -329,16 +329,17 @@ def update_file():
         Proxy(ip, int(port), proto)
         for ip, port, proto in proxies
     ]
-    # random.shuffle(proxies)
-    # working_proxies = list(check_proxies(proxies))
-    #
-    # expected_at_least = 400
-    # if len(working_proxies) < expected_at_least:
-    #     print(f'Found too few working proxies: {len(working_proxies)}')
-    #     exit(1)
+    random.shuffle(proxies)
+    working_proxies = list(check_proxies(proxies))
+
+    expected_at_least = 200
+    logger.info(f'Working: {len(working_proxies)}')
+    if len(working_proxies) < expected_at_least:
+        logger.error('Found too few working proxies')
+        exit(1)
 
     with open('proxies.txt', 'w') as out:
-        out.writelines((str(proxy) + '\n' for proxy in proxies))
+        out.writelines((str(proxy) + '\n' for proxy in working_proxies))
 
 
 if __name__ == '__main__':
